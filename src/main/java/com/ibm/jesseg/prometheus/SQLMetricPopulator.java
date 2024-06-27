@@ -40,12 +40,7 @@ public class SQLMetricPopulator {
     private ConnectionManager m_connMan;
     private final LinkedList<String> m_prepSql;
 
-    public SQLMetricPopulator(AppLogger _logger, CollectorRegistry _registry, Config _config,
-                              ConnectionManager _connMan,
-                              long _interval,
-                              boolean _isMultiRow,
-                              String _sql, boolean _includeHostname, String _gaugePrefix)
-            throws IOException, SQLException {
+    public SQLMetricPopulator(AppLogger _logger, CollectorRegistry _registry, Config _config, ConnectionManager _connMan, long _interval, boolean _isMultiRow, String _sql, boolean _includeHostname, String _gaugePrefix) throws IOException, SQLException {
         m_logger = _logger;
         m_prepSql = new LinkedList<String>(Arrays.asList(_sql.split("; ")));
         m_sql = m_prepSql.removeLast();
@@ -81,8 +76,7 @@ public class SQLMetricPopulator {
                     continue;
                 }
                 String gaugeName = getGaugeName(columnName, null);
-                m_logger.printfln_verbose("registering collector: column %s of type %s (gauge name '%s')", columnName,
-                        columnTypeStr, gaugeName);
+                m_logger.printfln_verbose("registering collector: column %s of type %s (gauge name '%s')", columnName, columnTypeStr, gaugeName);
                 getGauge(gaugeName, columnLabel);
                 if (0 == m_gauges.size()) {
                     m_logger.println_warn("No numeric data for SQL: " + m_sql);
@@ -98,11 +92,7 @@ public class SQLMetricPopulator {
             return gauge;
         }
         m_logger.printfln_verbose("registering gauge: %s", _gaugeName);
-        Gauge ret = Gauge.build()
-                .name(_gaugeName)
-                .help(_help)
-                .labelNames("hostname", "driver_class")
-                .register();
+        Gauge ret = Gauge.build().name(_gaugeName).help(_help).labelNames("hostname", "driver_class").register();
         m_gauges.put(_gaugeName, ret);
         return ret;
     }
@@ -110,13 +100,13 @@ public class SQLMetricPopulator {
     private String getGaugeName(String _columnName, String _rowName) {
         String ret = "";
         if (m_includeHostname) {
-            ret += m_config.getHostNameForDisplay().replaceAll("\\..*", "") + "__";
+            ret += m_config.getHostNameForDisplay().replaceAll("\\..*", "") + "_";
         }
         if (StringUtils.isNonEmpty(m_gaugePrefix)) {
-            ret += m_gaugePrefix + "__";
+            ret += m_gaugePrefix + "_";
         }
         if (StringUtils.isNonEmpty(_rowName)) {
-            ret += _rowName + "__";
+            ret += _rowName + "_";
         }
         ret += _columnName;
         return ret.replaceAll("[^_A-Za-z0-9]", "");
@@ -162,8 +152,7 @@ public class SQLMetricPopulator {
                             }
                         }
                         double value = rs.getDouble(i);
-                        gauge.labels(m_config.getHostNameForDisplay().replaceAll("\\..*", ""), m_config.getDriverClass())
-                                .set(value);
+                        gauge.labels(m_config.getHostNameForDisplay().replaceAll("\\..*", ""), m_config.getDriverClass()).set(value);
                     }
                     if (!m_isMultiRow) {
                         break;
