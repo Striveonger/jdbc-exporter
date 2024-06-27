@@ -63,13 +63,7 @@ public class MainApp {
             List<SQLMetricPopulator> populators = new LinkedList<SQLMetricPopulator>();
             final List<SQLQuery> queries = config.getSQLQueries();
             for (SQLQuery query : queries) {
-                populators.add(new SQLMetricPopulator(logger, registry, config,
-                        new ConnectionManager(config),
-                        query.getInterval(),
-                        query.isMultiRow(),
-                        query.getSql(),
-                        query.getShowHostname(),
-                        query.getGaugePrefix()));
+                populators.add(new SQLMetricPopulator(logger, registry, config, new ConnectionManager(config), query.getInterval(), query.isMultiRow(), query.getSql(), query.getShowHostname(), query.getGaugePrefix()));
             }
             logger.println("Verifying metrics collection....");
             for (SQLMetricPopulator populator : populators) {
@@ -84,10 +78,7 @@ public class MainApp {
             MetricsServlet metricsServlet = new MetricsServlet(registry);
 
             ServletHolder nowGatherer = new ServletHolder(metricsServlet) {
-                public synchronized void handle(org.eclipse.jetty.server.Request baseRequest,
-                        javax.servlet.ServletRequest request,
-                        javax.servlet.ServletResponse response)
-                        throws javax.servlet.ServletException, javax.servlet.UnavailableException, IOException {
+                public synchronized void handle(org.eclipse.jetty.server.Request baseRequest, javax.servlet.ServletRequest request, javax.servlet.ServletResponse response) throws javax.servlet.ServletException, javax.servlet.UnavailableException, IOException {
                     List<Thread> gatherNowThreads = new LinkedList<Thread>();
                     for (SQLMetricPopulator queryPopulator : populators) {
                         Thread t = new Thread(new Runnable() {
@@ -98,7 +89,9 @@ public class MainApp {
                                     logger.exception(e);
                                     return;
                                 }
-                            };
+                            }
+
+                            ;
                         }, "Gather NOW");
                         gatherNowThreads.add(t);
                         t.start();
@@ -111,7 +104,9 @@ public class MainApp {
                         }
                     }
                     super.handle(baseRequest, request, response);
-                };
+                }
+
+                ;
             };
 
             context.addServlet(new ServletHolder(metricsServlet), "/metrics");
@@ -178,9 +173,7 @@ public class MainApp {
             return ret.getAbsoluteFile();
         }
         ConsoleQuestionAsker asker = ConsoleQuestionAsker.get();
-        boolean isCreatingDefault = asker.askBooleanQuestion(
-                _logger, "y", "Configuration file %s not found. Would you like to initialize one with defaults?",
-                ret.toString());
+        boolean isCreatingDefault = asker.askBooleanQuestion(_logger, "y", "Configuration file %s not found. Would you like to initialize one with defaults?", ret.toString());
 
         if (!isCreatingDefault) {
             throw new IOException("No configuration file");
